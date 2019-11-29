@@ -34,7 +34,7 @@ I would recommend adhering to the following pattern so that your provider will b
 or just registered on it's own but with a specific desired fallback provider:
 
 
-```
+```csharp
 
     public class CustomAuthorizationPolicyProvider : IAuthorizationPolicyProvider
     {
@@ -85,7 +85,7 @@ or just registered on it's own but with a specific desired fallback provider:
 
 ```
 
-By sticking to this pattern, consumers of your provider will have the most flexibility. They can either register it with any provider they want as the fallback, for example the Default provider:
+By sticking to this pattern, consumers of your provider will have the most flexibility. They can either register it with any provider they'd like as the fallback, for example the Default provider:
 
 
 ```csharp
@@ -109,3 +109,22 @@ Or they can use it as part of a `CompositePolicyProvider` (as provided in this r
 ```
 
 In either situation, your provider should work.
+
+As a bonus, here is an example of the extension method you might ship with your custom provider, so consumers can add it directly when not wishing to add it using the composite pattern provided by this repo:
+
+```csharp
+
+    public static class ServiceCollectionExtensions
+    {
+        public static IServiceCollection AddMyCustomAuthorisationPolicyProvider(this IServiceCollection services, Func<IServiceProvider, IAuthorizationPolicyProvider> innerProviderFactory = null)
+        {
+            services.AddSingleton<IAuthorizationPolicyProvider, PermissionsAuthorizationPolicyProvider>(sp =>
+            {
+                return new PermissionsAuthorizationPolicyProvider(innerProviderFactory?.Invoke(sp));
+            });
+           
+            return services;
+        }
+    }
+    
+```
