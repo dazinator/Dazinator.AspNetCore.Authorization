@@ -69,7 +69,7 @@ or just registered on it's own but with a specific desired fallback provider:
                 {
                     return NullResult;
                 }
-                return _innerProvider?.GetPolicyAsync();
+                return _innerProvider?.GetPolicyAsync(policyName);
             }
 
             // TODO: else return your custom policy
