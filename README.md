@@ -36,7 +36,7 @@ or just registered on it's own but with a specific desired fallback provider:
 
 ```
 
-    public partial class CustomAuthorizationPolicyProvider : IAuthorizationPolicyProvider
+    public class CustomAuthorizationPolicyProvider : IAuthorizationPolicyProvider
     {
         public const string PolicyPrefix = "Custom:";
         private readonly IAuthorizationPolicyProvider _innerProvider;
