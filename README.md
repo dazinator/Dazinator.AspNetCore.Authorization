@@ -1,14 +1,26 @@
 ## Features
-- Versioning done with GitVersion.
-- Can build via AppVeyor and Azure Devops Pipelines.
-- All projects will be SourceLinked to github thanks to `directory.props` file.
 
-# [Getting Started]
-- Clone this repo, then push to your own origin.
-- Create your solution (.sln) and projects in the `/src` directory.
-- Make sure global.json has the right version of the .net sdk that you require.
-- For AppVeyor builds, update AppVeyor.yml:
-    - dotnet sdk version (currently set to install latest pre-release).
-    - Now you can add to AppVeyor.
-- For Azure Devops builds:
-    - Import pipelines yaml file into Azure Devops pipeline.  
+Allows you to build a composite `AuthorizationPolicyProvider` for your ASP.NET Core application.
+This basically allows you to consolidate multiple `IAuthorizationPolicyProvider`s into a single one,
+which will loop through the inner providers in order, to query each one to obtain the policy. 
+If a NULL policy is returned by a provider, it will proceed to query the next provider in the list, until either the policy is returned, or NULL is returned.
+
+
+Usage in `startup.cs`:
+
+```csharp
+
+    services.AddCompositeAuthorizationPolicyProvider((builder) =>
+    {
+        builder.AddSingletonProvider<PermissionPolicyProvider>()
+               .AddSingletonProvider<TestPolicyProvider>((s) =>
+               {
+                   return new TestPolicyProvider("Bar");
+               })
+	           .AddSingletonProvider<DefaultAuthorizationPolicyProvider>(); // Asp.net default provider.
+    });
+
+
+```
+
+See the tests for more information regarding usage.
