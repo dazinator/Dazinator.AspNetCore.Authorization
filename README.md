@@ -1,3 +1,5 @@
+[![Build Status](https://dev.azure.com/darrelltunnell/Public%20Projects/_apis/build/status/dazinator.Dazinator.AspNetCore.Authorization?branchName=master)](https://dev.azure.com/darrelltunnell/Public%20Projects/_build/latest?definitionId=10&branchName=master)
+
 ## Features
 
 Allows you to build a composite `AuthorizationPolicyProvider` for your ASP.NET Core application.
