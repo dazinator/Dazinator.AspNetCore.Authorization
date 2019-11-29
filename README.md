@@ -30,8 +30,8 @@ See the tests for more information regarding usage.
 ## Note to Provider Authors
 
 Are you writing a custom AuthorizationPolicyProvider that others might user?
-I would recommend adhering to the following pattern so that your provider will as either part of the composite pattern above,
-or could be registered on it's own with a specific fallback provider:
+I would recommend adhering to the following pattern so that your provider will behave well as either part of a composite provider,
+or just registered on it's own but with a specific desired fallback provider:
 
 
 ```
@@ -80,7 +80,7 @@ or could be registered on it's own with a specific fallback provider:
 
 ```
 
-By sticking to this pattern, consumers of your provider have the most flexibility. They can use it with any provider they want as a fallback, for example the Default provider:
+By sticking to this pattern, consumers of your provider will have the most flexibility. They can register it with any provider they want as the fallback, for example the Default provider:
 
 
 ```csharp
@@ -91,7 +91,7 @@ By sticking to this pattern, consumers of your provider have the most flexibilit
 
 ```
 
-Or they can use it as part of a `CompositePolicyProvider` as shown in above in this readme. The equivalent being:
+Or they can use it as part of a `CompositePolicyProvider` as shown in above in this readme. The equivalent in this case would be:
 
 ```csharp
 
