@@ -42,13 +42,17 @@ or just registered on it's own but with a specific desired fallback provider:
         private readonly IAuthorizationPolicyProvider _innerProvider;
         private readonly Task<AuthorizationPolicy> NullResult = Task.FromResult(default(AuthorizationPolicy));
 
-        public PermissionsAuthorizationPolicyProvider(IAuthorizationPolicyProvider innerProvider)
+        public CustomAuthorizationPolicyProvider(IAuthorizationPolicyProvider innerProvider = null)
         {
             _innerProvider = innerProvider; // could be null if being used as part of composite.
         }
 
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
         {
+	    // todo: implement your conditional logic to return a new default policy, or defer to the inner provider if there is one.
+	    // if you don't want to override the default policy and there is no inner provider, just return null.
+	    
+	    // in this case, we dont want to supply a default policy..
             if(_innerProvider == null)
             {
                 return NullResult;
@@ -58,6 +62,7 @@ or just registered on it's own but with a specific desired fallback provider:
 
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
+	    // If can't locate policy, defer to inner provider if there is one, else return null
             if (!policyName.StartsWith(CustomAuthorizationPolicyProvider.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (_innerProvider == null)
@@ -67,7 +72,7 @@ or just registered on it's own but with a specific desired fallback provider:
                 return _innerProvider?.GetPolicyAsync();
             }
 
-            // TODO: return your custom policy
+            // TODO: else return your custom policy
 
            // var policy = new AuthorizationPolicyBuilder()
            //     .RequireClaim(CustomClaimTypes.Permission, permissionClaimValues)
@@ -80,7 +85,7 @@ or just registered on it's own but with a specific desired fallback provider:
 
 ```
 
-By sticking to this pattern, consumers of your provider will have the most flexibility. They can register it with any provider they want as the fallback, for example the Default provider:
+By sticking to this pattern, consumers of your provider will have the most flexibility. They can either register it with any provider they want as the fallback, for example the Default provider:
 
 
 ```csharp
@@ -91,7 +96,7 @@ By sticking to this pattern, consumers of your provider will have the most flexi
 
 ```
 
-Or they can use it as part of a `CompositePolicyProvider` as shown in above in this readme. The equivalent in this case would be:
+Or they can use it as part of a `CompositePolicyProvider` (as provided in this repository) and shown in above in this readme. The equivalent in that case would be:
 
 ```csharp
 
