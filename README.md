@@ -69,7 +69,7 @@ or just registered on it's own but with a specific desired fallback provider:
 
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-            if (!policyName.StartsWith(PermissionsAuthorizationPolicyProvider.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!policyName.StartsWith(PolicyPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (_innerProvider == null)
                 {
