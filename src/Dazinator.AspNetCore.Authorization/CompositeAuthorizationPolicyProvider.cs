@@ -7,6 +7,7 @@ namespace Dazinator.Extensions.Authorization
     {
 
         private readonly IAuthorizationPolicyProvider[] _innerProviders;
+        private readonly Task<AuthorizationPolicy> NullResult = Task.FromResult(default(AuthorizationPolicy));
 
         public CompositeAuthorizationPolicyProvider(params IAuthorizationPolicyProvider[] innerProviders)
         {
@@ -24,8 +25,24 @@ namespace Dazinator.Extensions.Authorization
                 }
             }
 
-            return null;
+            return await NullResult;
         }
+
+#if NETCOREAPP3_0
+        public async Task<AuthorizationPolicy> GetFallbackPolicyAsync()
+        {
+            foreach (var item in _innerProviders)
+            {
+                var policy = await item.GetFallbackPolicyAsync();
+                if (policy != null)
+                {
+                    return policy;
+                }
+            }
+
+            return await NullResult;
+        }
+#endif
 
         public async Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
@@ -38,7 +55,7 @@ namespace Dazinator.Extensions.Authorization
                 }
             }
 
-            return null;
+            return await NullResult;
         }
     }
 }

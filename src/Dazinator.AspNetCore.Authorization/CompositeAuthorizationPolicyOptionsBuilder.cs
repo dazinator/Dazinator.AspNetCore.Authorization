@@ -11,7 +11,6 @@ namespace Dazinator.Extensions.Authorization
         private readonly IServiceCollection _services;
         private readonly List<Type> _providers;
 
-
         public CompositeAuthorizationPolicyOptionsBuilder(IServiceCollection services)
         {
             _services = services;
