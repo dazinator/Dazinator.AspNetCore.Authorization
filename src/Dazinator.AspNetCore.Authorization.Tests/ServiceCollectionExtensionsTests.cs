@@ -25,6 +25,42 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             Assert.NotNull(composite);
             Assert.IsType<CompositeAuthorizationPolicyProvider>(composite);
         }
+
+        [Fact]
+        public void Can_Register_Composite_Provider_With_DefaultAuthroizationProvider()
+        {
+            var services = new ServiceCollection() as IServiceCollection;
+            services.AddOptions();
+            services.AddAuthorization();
+            services.AddCompositeAuthorizationPolicyProvider((builder) =>
+            {
+                builder.AddSingletonProvider<TestPolicyProvider>()
+                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+            });
+
+            var sp = services.BuildServiceProvider();
+            var composite = sp.GetRequiredService<IAuthorizationPolicyProvider>();
+            Assert.NotNull(composite);
+            Assert.IsType<CompositeAuthorizationPolicyProvider>(composite);
+        }
+
+        [Fact]
+        public void Can_Register_Composite_Provider_With_A_Provider_That_Has_Inner_Provider()
+        {
+            var services = new ServiceCollection() as IServiceCollection;
+            services.AddOptions();
+            services.AddAuthorization();
+            services.AddCompositeAuthorizationPolicyProvider((builder) =>
+            {
+                builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
+                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+            });
+
+            var sp = services.BuildServiceProvider();
+            var composite = sp.GetRequiredService<IAuthorizationPolicyProvider>();
+            Assert.NotNull(composite);
+            Assert.IsType<CompositeAuthorizationPolicyProvider>(composite);
+        }
     }
 
 }
