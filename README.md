@@ -42,28 +42,34 @@ or just registered on it's own but with a specific desired fallback provider:
         private readonly IAuthorizationPolicyProvider _innerProvider;
         private readonly Task<AuthorizationPolicy> NullResult = Task.FromResult(default(AuthorizationPolicy));
 
-        public CustomAuthorizationPolicyProvider(IAuthorizationPolicyProvider innerProvider = null)
+        public PermissionsAuthorizationPolicyProvider(IAuthorizationPolicyProvider innerProvider = null)
         {
-            _innerProvider = innerProvider; // could be null if being used as part of composite.
+            _innerProvider = innerProvider;
         }
 
         public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
         {
-	    // todo: implement your conditional logic to return a new default policy, or defer to the inner provider if there is one.
-	    // if you don't want to override the default policy and there is no inner provider, just return null.
-	    
-	    // in this case, we dont want to supply a default policy..
-            if(_innerProvider == null)
+            if (_innerProvider == null)
             {
                 return NullResult;
             }
             return _innerProvider?.GetDefaultPolicyAsync();
         }
 
+#if NETCOREAPP3_0
+        public Task<AuthorizationPolicy> GetFallbackPolicyAsync()
+        {
+            if (_innerProvider == null)
+            {
+                return NullResult;
+            }
+            return _innerProvider?.GetFallbackPolicyAsync();
+        }
+#endif
+
         public Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {
-	    // If can't locate policy, defer to inner provider if there is one, else return null
-            if (!policyName.StartsWith(CustomAuthorizationPolicyProvider.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
+            if (!policyName.StartsWith(PermissionsAuthorizationPolicyProvider.PolicyPrefix, StringComparison.OrdinalIgnoreCase))
             {
                 if (_innerProvider == null)
                 {
@@ -72,15 +78,14 @@ or just registered on it's own but with a specific desired fallback provider:
                 return _innerProvider?.GetPolicyAsync(policyName);
             }
 
-            // TODO: else return your custom policy
-
-           // var policy = new AuthorizationPolicyBuilder()
-           //     .RequireClaim(CustomClaimTypes.Permission, permissionClaimValues)
-           //     .Build();
+            // TODO: Build policy but also think about caching!
+            // var policy = new AuthorizationPolicyBuilder()
+            //     .RequireClaim(CustomClaimTypes.Foo, permissionClaimValues)
+            //     .Build();
 
             return Task.FromResult(policy);
         }
-    }
+    } 
 
 
 ```
