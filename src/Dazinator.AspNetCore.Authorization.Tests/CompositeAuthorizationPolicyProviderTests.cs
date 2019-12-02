@@ -7,7 +7,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
     public class CompositeAuthorizationPolicyProviderTests
     {
         [Fact]
-        public async Task GetDefaultPolicyAsync_When_No_Matched_Policy_Provider_Returns_Null_Policy()
+        public async Task GetDefaultPolicyAsync_WhenNoMatchedPolicy_ProviderReturnsNullPolicy()
         {          
             var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), new TestPolicyProvider("Bar"));
             var policy = await sut.GetDefaultPolicyAsync();
@@ -15,7 +15,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
         }
 
         [Fact]
-        public async Task GetPolicyAsync_When_No_Matched_Policy_Provider_Returns_Null_Policy()
+        public async Task GetPolicyAsync_WhenNoMatchedPolicy_ProviderReturnsNullPolicy()
         {
             var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), new TestPolicyProvider("Bar"));
             var policy = await sut.GetPolicyAsync("BAZ");
@@ -23,7 +23,15 @@ namespace Dazinator.AspNetCore.Authorization.Tests
         }
 
         [Fact]
-        public async Task GetPolicyAsync_When_Matched_Policy_Provider_Returns_Policy()
+        public async Task GetFallbackPolicyAsync_WhenNoMatchedPolicy_ProviderReturnsNullPolicy()
+        {
+            var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), new TestPolicyProvider("Bar"));
+            var policy = await sut.GetFallbackPolicyAsync();
+            Assert.Null(policy);
+        }
+
+        [Fact]
+        public async Task GetPolicyAsync_WhenMatchedPolicy_ProviderReturnsPolicy()
         {
             var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), new TestPolicyProvider("Bar"));
             var firstPolicy = await sut.GetPolicyAsync("Foo"); // from first provider
@@ -36,11 +44,21 @@ namespace Dazinator.AspNetCore.Authorization.Tests
         }
 
         [Fact]
-        public async Task GetDefaultPolicyAsync_When_Matched_Policy_Provider_Returns_Policy()
+        public async Task GetDefaultPolicyAsync_WhenMatchedPolicy_ProviderReturnsPolicy()
         {
             var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), 
                                                                new TestPolicyProvider("Bar", returnDefaultPolicy: true));
             var policy = await sut.GetDefaultPolicyAsync();
+            Assert.NotNull(policy);
+            Assert.Contains("Bar", policy.AuthenticationSchemes);
+        }
+
+        [Fact]
+        public async Task GetFallbackPolicyAsync_WhenMatchedPolicy_ProviderReturnsPolicy()
+        {
+            var sut = new CompositeAuthorizationPolicyProvider(new TestPolicyProvider("Foo"),
+                                                               new TestPolicyProvider("Bar", returnFallbackPolicy: true));
+            var policy = await sut.GetFallbackPolicyAsync();
             Assert.NotNull(policy);
             Assert.Contains("Bar", policy.AuthenticationSchemes);
         }
