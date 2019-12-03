@@ -58,4 +58,5 @@ namespace Dazinator.Extensions.Authorization
             return await NullResult;
         }
     }
+    
 }

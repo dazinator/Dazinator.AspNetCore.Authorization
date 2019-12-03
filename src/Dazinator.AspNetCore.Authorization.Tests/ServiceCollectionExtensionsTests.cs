@@ -1,6 +1,8 @@
 using Dazinator.Extensions.Authorization;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Xunit;
 
 namespace Dazinator.AspNetCore.Authorization.Tests
@@ -61,6 +63,39 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             Assert.NotNull(composite);
             Assert.IsType<CompositeAuthorizationPolicyProvider>(composite);
         }
+
+
+        [Fact]
+        public void Can_Register_Composite_Provider_With_A_CachingInnerProvider()
+        {
+            var services = new ServiceCollection() as IServiceCollection;
+            services.AddOptions();
+            services.AddAuthorization();
+
+            services.AddSingleton<TestPolicyProvider>(sp => new TestPolicyProvider());
+
+            services.AddCompositeAuthorizationPolicyProvider((builder) =>
+            {
+                builder.AddSingletonMemoryCachingPolicyProvider<TestPolicyProvider>((options) =>
+                {
+                    options.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
+                    {
+                        SizeLimit = 1024
+                    })).SetConfigureCacheEntry((policyName, entry) =>
+                    {
+                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
+                    });
+                });
+                builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
+                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+            });
+
+            var sp = services.BuildServiceProvider();
+            var composite = sp.GetRequiredService<IAuthorizationPolicyProvider>();
+            Assert.NotNull(composite);
+            Assert.IsType<CompositeAuthorizationPolicyProvider>(composite);
+        }
+
     }
 
 }

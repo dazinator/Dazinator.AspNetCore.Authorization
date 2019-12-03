@@ -2,6 +2,8 @@
 
 ## Features
 
+
+### Composite Authorization Policy Provider
 Allows you to build a composite `AuthorizationPolicyProvider` for your ASP.NET Core application.
 This basically allows you to consolidate multiple `IAuthorizationPolicyProvider`s into a single one,
 which will loop through the inner providers in order, to query each one to obtain the policy. 
@@ -26,6 +28,42 @@ Usage in `startup.cs`:
 ```
 
 See the tests for more information regarding usage.
+
+## MemoryCaching AuthorizationPolicyProvider
+
+Allows you to decorate an `IAuthorizationPolicyProvider` provider with a Memory Caching one, along with configuring cache expiration for policies.
+See tests and README in the Caching project for more info.
+
+Usage:
+
+```csharp
+
+            // Register your inner policy provider with DI that we will later wrap with a Caching provider.
+            services.AddSingleton<TestPolicyProvider>(sp => new TestPolicyProvider()); 
+
+            // The Caching provider can be used standalone but I am showing usage within a composite here. See tests for standalone usage.
+            services.AddCompositeAuthorizationPolicyProvider((builder) =>
+            {
+			    // Register a caching provider that decorates your TInner provider but adds caching.
+                builder.AddSingletonMemoryCachingPolicyProvider<TestPolicyProvider>((options) =>
+                {
+				    // Optionally configure the `IMemoryCache` otherwise shared `IMemoryCache` will be used which must be registered seperately with services.AddMemoryCache().
+                    options.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
+                    {
+                        SizeLimit = 1024
+                    })).SetConfigureCacheEntry((policyName, entry) =>
+                    { 
+					    // As policies are cached, you can configure cache entry / expiry options here,
+						// optionally taking advantage of the policyName to make caching decisions.
+                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
+                    });
+                });
+				// Also adding these other providers to the composite as fallbacks in order of precedence.
+                builder.AddSingletonProvider<SomeOtherPolicyProvider>((sp) => new SomeOtherPolicyProvider())
+                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+            });   
+    });
+```
 
 ## Note to Provider Authors
 

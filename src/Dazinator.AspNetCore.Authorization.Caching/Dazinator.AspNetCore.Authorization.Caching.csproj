@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netcoreapp3.0</TargetFrameworks>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)'=='netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="2.2.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)'=='netcoreapp3.0'">
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.0.1" />
+  </ItemGroup>
+  
+
+  <ItemGroup>
+    <ProjectReference Include="..\Dazinator.AspNetCore.Authorization\Dazinator.AspNetCore.Authorization.csproj" />
+  </ItemGroup>
+
+</Project>
