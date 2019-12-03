@@ -44,21 +44,21 @@ Usage:
             // The Caching provider can be used standalone but I am showing usage within a composite here. See tests for standalone usage.
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-			    // Register a caching provider that decorates your TInner provider but adds caching.
+                // Register a caching provider that decorates your TInner provider but adds caching.
                 builder.AddSingletonMemoryCachingPolicyProvider<TestPolicyProvider>((options) =>
                 {
-				    // Optionally configure the `IMemoryCache` otherwise shared `IMemoryCache` will be used which must be registered seperately with services.AddMemoryCache().
+	            // Optionally configure the `IMemoryCache` otherwise shared `IMemoryCache` will be used which must be registered seperately with services.AddMemoryCache().
                     options.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
-                    {
-                        SizeLimit = 1024
+                    {                       
                     })).SetConfigureCacheEntry((policyName, entry) =>
                     { 
-					    // As policies are cached, you can configure cache entry / expiry options here,
-						// optionally taking advantage of the policyName to make caching decisions.
+			// As policies are cached, you can configure cache entry / expiry options here,
+			// optionally taking advantage of the policyName to make caching decisions.
                         entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
                     });
                 });
-				// Also adding these other providers to the composite as fallbacks in order of precedence.
+		
+		// Also adding these other providers to the composite as fallbacks in order of precedence.
                 builder.AddSingletonProvider<SomeOtherPolicyProvider>((sp) => new SomeOtherPolicyProvider())
                        .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
             });   
