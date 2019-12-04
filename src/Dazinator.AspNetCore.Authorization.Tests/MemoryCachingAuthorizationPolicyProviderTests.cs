@@ -23,7 +23,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
 
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Foo"), options);
             var policy = await sut.GetDefaultPolicyAsync();
             Assert.Null(policy);
 
@@ -44,7 +44,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 Cache = cache,
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Foo"), options);
             var policy = await sut.GetPolicyAsync("BAZ");
             Assert.Null(policy);
 
@@ -66,7 +66,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 Cache = cache,
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Foo"), options);
             var policy = await sut.GetFallbackPolicyAsync();
             Assert.Null(policy);
 
@@ -87,7 +87,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 Cache = cache,
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Foo"), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Foo"), options);
             var firstPolicyTask = sut.GetPolicyAsync("Foo"); // from first provider
             var firstPolicy = await firstPolicyTask;
             Assert.NotNull(firstPolicy);
@@ -119,7 +119,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 Cache = cache,
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Foo", returnDefaultPolicy: true), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Foo", returnDefaultPolicy: true), options);
             var policy = await sut.GetDefaultPolicyAsync();
             Assert.NotNull(policy);
             Assert.Contains("Foo", policy.AuthenticationSchemes);
@@ -142,7 +142,7 @@ namespace Dazinator.AspNetCore.Authorization.Tests
                 Cache = cache,
                 ConfigurePolicyCacheEntry = (name, entry) => entry.SetPriority(CacheItemPriority.NeverRemove)
             };
-            var sut = new MemoryCachingAuthorizationPolicyProvider(new TestPolicyProvider("Bar", returnFallbackPolicy: true), options);
+            var sut = new MemoryCachingAuthorizationPolicyProvider<TestPolicyProvider>(new TestPolicyProvider("Bar", returnFallbackPolicy: true), options);
             var policy = await sut.GetFallbackPolicyAsync();
             Assert.NotNull(policy);
             Assert.Contains("Bar", policy.AuthenticationSchemes);

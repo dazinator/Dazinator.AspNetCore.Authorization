@@ -7,18 +7,29 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CompositeAuthorizationPolicyBuilderExtensions
     {
-        public static void AddSingletonMemoryCachingPolicyProvider<TInnerProvider>(this CompositeAuthorizationPolicyOptionsBuilder builder, Action<CachingAuthorizationPolicyProviderOptionsBuilder> configure)
-            where TInnerProvider : IAuthorizationPolicyProvider
+        public static void AddCaching<TInnerProvider>(this CompositeAuthorizationPolicyProviderOptionsBuilder<TInnerProvider> builder, Action<CachingAuthorizationPolicyProviderOptionsBuilder> configure)
+            where TInnerProvider : class, IAuthorizationPolicyProvider
         {
             var optionsBuilder = new CachingAuthorizationPolicyProviderOptionsBuilder();
             configure(optionsBuilder);
-
-            builder.AddSingletonProvider<MemoryCachingAuthorizationPolicyProvider>((sp) =>
+            builder.CompositePolicyOptionsBulder.AddProvider<MemoryCachingAuthorizationPolicyProvider<TInnerProvider>>((s) =>
             {
-                var options = optionsBuilder.Build(sp);
-                var inner = sp.GetRequiredService<TInnerProvider>();
-                return new MemoryCachingAuthorizationPolicyProvider(inner, options);
+                s.AsSingleton((sp) =>
+                {
+                    var options = optionsBuilder.Build(sp);
+                    var inner = sp.GetRequiredService<TInnerProvider>();
+                    return new MemoryCachingAuthorizationPolicyProvider<TInnerProvider>(inner, options);
+                });
             });
+            builder.DecoratorProviderType = typeof(MemoryCachingAuthorizationPolicyProvider<TInnerProvider>);
+
+
+            //builder.AddSingletonProvider<MemoryCachingAuthorizationPolicyProvider<TInnerProvider>>((sp) =>
+            //{
+            //    var options = optionsBuilder.Build(sp);
+            //    var inner = sp.GetRequiredService<TInnerProvider>();
+            //    return new MemoryCachingAuthorizationPolicyProvider(inner, options);
+            //});
         }
     }
 

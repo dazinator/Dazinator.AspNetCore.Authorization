@@ -4,10 +4,11 @@ using System.Threading.Tasks;
 
 namespace Dazinator.AspNetCore.Authorization.Caching
 {
-    public class MemoryCachingAuthorizationPolicyProvider : IAuthorizationPolicyProvider
+    public class MemoryCachingAuthorizationPolicyProvider<TInnerProvider> : IAuthorizationPolicyProvider
+        where TInnerProvider: class, IAuthorizationPolicyProvider
     {
 
-        private readonly IAuthorizationPolicyProvider _innerProvider;
+        private readonly TInnerProvider _innerProvider;
         private readonly CachingAuthorizationPolicyProviderOptions _options;
 
         public const string DefaultPolicyName = "DefaultPolicy";
@@ -18,7 +19,7 @@ namespace Dazinator.AspNetCore.Authorization.Caching
         public readonly string FallbackPolicyCacheKey;
 
 
-        public MemoryCachingAuthorizationPolicyProvider(IAuthorizationPolicyProvider innerProvider, CachingAuthorizationPolicyProviderOptions options)
+        public MemoryCachingAuthorizationPolicyProvider(TInnerProvider innerProvider, CachingAuthorizationPolicyProviderOptions options)
         {
             _innerProvider = innerProvider;
            // _cache = cache;

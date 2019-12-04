@@ -14,18 +14,16 @@ Usage in `startup.cs`:
 
 ```csharp
 
-    services.AddCompositeAuthorizationPolicyProvider((builder) =>
-    {
-        builder.AddSingletonProvider<PermissionPolicyProvider>()
-               .AddSingletonProvider<TestPolicyProvider>((s) =>
-               {
-                   return new TestPolicyProvider("Bar");
-               })
-	           .AddSingletonProvider<DefaultAuthorizationPolicyProvider>(); // Asp.net default provider.
-    });
-
-
-```
+            services.AddCompositeAuthorizationPolicyProvider((builder) =>
+            {
+                builder.AddProvider<PermissionPolicyProvider>((a) => a.AsSingleton())
+                       .AddProvider<TestPolicyProvider>((s) =>
+                       {
+                           s.AsSingleton((sp) => new TestPolicyProvider("Bar"));
+                       })
+					   .AddProvider<DefaultAuthorizationPolicyProvider>((a) => a.AsSingleton()); // Asp.net default provider.
+            });
+    ```
 
 See the tests for more information regarding usage.
 
@@ -38,31 +36,25 @@ Usage:
 
 ```csharp
 
-            // Register your inner policy provider with DI that we will later wrap with a Caching provider.
-            services.AddSingleton<TestPolicyProvider>(sp => new TestPolicyProvider()); 
-
-            // The Caching provider can be used standalone but I am showing usage within a composite here. See tests for standalone usage.
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-			    // Register a caching provider that decorates your TInner provider but adds caching.
-                builder.AddSingletonMemoryCachingPolicyProvider<TestPolicyProvider>((options) =>
+                builder.AddProvider<TestPolicyProvider>((a) =>
                 {
-				    // Optionally configure the `IMemoryCache` otherwise shared `IMemoryCache` will be used which must be registered seperately with services.AddMemoryCache().
-                    options.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
-                    {
-                        SizeLimit = 1024
-                    })).SetConfigureCacheEntry((policyName, entry) =>
-                    { 
-					    // As policies are cached, you can configure cache entry / expiry options here,
-						// optionally taking advantage of the policyName to make caching decisions.
-                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
-                    });
-                });
-				// Also adding these other providers to the composite as fallbacks in order of precedence.
-                builder.AddSingletonProvider<SomeOtherPolicyProvider>((sp) => new SomeOtherPolicyProvider())
-                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+                    a.AsSingleton((sp) => new TestPolicyProvider()) // custom factory method
+                     .AddCaching((cacheOptions) =>
+                     {
+                         cacheOptions.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
+                         {
+                             SizeLimit = 1024
+                         })).SetConfigureCacheEntry((policyName, entry) =>
+                         {
+                             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
+                         });
+                     });
+                })
+                .AddProvider<DefaultAuthorizationPolicyProvider>((a) => a.AsSingleton());  // add more providers to composite.             
+
             });   
-    });
 ```
 
 ## Note to Provider Authors
@@ -139,21 +131,10 @@ By sticking to this pattern, consumers of your provider will have the most flexi
 
 ```
 
-Or they can use it as part of a `CompositePolicyProvider` (as provided in this repository) and shown in above in this readme. The equivalent in that case would be:
-
-```csharp
-
-    services.AddCompositeAuthorizationPolicyProvider((builder) =>
-    {
-        builder.AddSingletonProvider<CustomAuthorizationPolicyProvider>()              
-	           .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
-    });
-
-```
-
+Or they can use it as part of a `CompositePolicyProvider` (as provided in this repository) and shown in above in this readme. 
 In either situation, your provider should work.
 
-As a bonus, here is an example of the extension method you might ship with your custom provider, so consumers can add it directly when not wishing to add it using the composite pattern provided by this repo:
+As a bonus, here is an example of the extension method you might ship with your custom provider, so consumers can add it directly and specify it's inner provider, when not wishing to add it using the composite pattern provided by this repo:
 
 ```csharp
 

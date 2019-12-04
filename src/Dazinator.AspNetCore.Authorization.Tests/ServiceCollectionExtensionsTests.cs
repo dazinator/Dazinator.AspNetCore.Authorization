@@ -15,10 +15,10 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             var services = new ServiceCollection();
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-                builder.AddSingletonProvider<TestPolicyProvider>()
-                       .AddSingletonProvider<TestPolicyProvider>((s) =>
+                builder.AddProvider<TestPolicyProvider>((a) => a.AsSingleton())
+                       .AddProvider<TestPolicyProvider>((s) =>
                        {
-                           return new TestPolicyProvider("Bar");
+                           s.AsSingleton((sp) => new TestPolicyProvider("Bar"));
                        });
             });
 
@@ -36,8 +36,11 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             services.AddAuthorization();
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-                builder.AddSingletonProvider<TestPolicyProvider>()
-                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+                builder.AddProvider<TestPolicyProvider>((a) => a.AsSingleton())
+                       .AddProvider<DefaultAuthorizationPolicyProvider>((a) => a.AsSingleton());
+
+                //builder.AddSingletonProvider<TestPolicyProvider>()
+                //       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
             });
 
             var sp = services.BuildServiceProvider();
@@ -54,8 +57,11 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             services.AddAuthorization();
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-                builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
-                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+                builder.AddProvider<TestPolicyProviderWithInnerProvider>((a) => a.AsSingleton((sp) => new TestPolicyProviderWithInnerProvider()))
+                       .AddProvider<DefaultAuthorizationPolicyProvider>((a) => a.AsSingleton());
+
+                //builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
+                //       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
             });
 
             var sp = services.BuildServiceProvider();
@@ -72,22 +78,28 @@ namespace Dazinator.AspNetCore.Authorization.Tests
             services.AddOptions();
             services.AddAuthorization();
 
-            services.AddSingleton<TestPolicyProvider>(sp => new TestPolicyProvider());
+           // services.AddSingleton<TestPolicyProvider>(sp => new TestPolicyProvider());
 
             services.AddCompositeAuthorizationPolicyProvider((builder) =>
             {
-                builder.AddSingletonMemoryCachingPolicyProvider<TestPolicyProvider>((options) =>
+                builder.AddProvider<TestPolicyProvider>((a) =>
                 {
-                    options.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
-                    {
-                        SizeLimit = 1024
-                    })).SetConfigureCacheEntry((policyName, entry) =>
-                    {
-                        entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
-                    });
-                });
-                builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
-                       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
+                    a.AsSingleton((sp) => new TestPolicyProvider())
+                     .AddCaching((cacheOptions) =>
+                     {
+                         cacheOptions.SetMemoryCacheFactory(sp => new MemoryCache(new MemoryCacheOptions
+                         {
+                             SizeLimit = 1024
+                         })).SetConfigureCacheEntry((policyName, entry) =>
+                         {
+                             entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(10);
+                         });
+                     });
+                })
+                .AddProvider<DefaultAuthorizationPolicyProvider>((a) => a.AsSingleton());               
+
+                //builder.AddSingletonProvider<TestPolicyProviderWithInnerProvider>((sp) => new TestPolicyProviderWithInnerProvider())
+                //       .AddSingletonProvider<DefaultAuthorizationPolicyProvider>();
             });
 
             var sp = services.BuildServiceProvider();
