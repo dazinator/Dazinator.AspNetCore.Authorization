@@ -28,7 +28,7 @@ namespace Dazinator.Extensions.Authorization
             return await NullResult;
         }
 
-#if NETCOREAPP3_0
+#if NETSTANDARD2_1
         public async Task<AuthorizationPolicy> GetFallbackPolicyAsync()
         {
             foreach (var item in _innerProviders)

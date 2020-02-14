@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29411.138
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dazinator.AspNetCore.Authorization", "Dazinator.AspNetCore.Authorization\Dazinator.AspNetCore.Authorization.csproj", "{378E44D9-B999-4047-BE3D-3A734922215B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dazinator.AspNetCore.Authorization.Tests", "Dazinator.AspNetCore.Authorization.Tests\Dazinator.AspNetCore.Authorization.Tests.csproj", "{69551371-3676-4BE8-B7E9-A5F925A345B8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dazinator.AspNetCore.Authorization.Tests", "Dazinator.AspNetCore.Authorization.Tests\Dazinator.AspNetCore.Authorization.Tests.csproj", "{69551371-3676-4BE8-B7E9-A5F925A345B8}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4F907792-BFF7-4FA2-A3DE-4B8A9773BFDA}"
 	ProjectSection(SolutionItems) = preProject
@@ -15,7 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dazinator.AspNetCore.Authorization.Caching", "Dazinator.AspNetCore.Authorization.Caching\Dazinator.AspNetCore.Authorization.Caching.csproj", "{CFD383AC-F21F-4DAD-929B-DA9B6124B5E8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dazinator.AspNetCore.Authorization.Caching", "Dazinator.AspNetCore.Authorization.Caching\Dazinator.AspNetCore.Authorization.Caching.csproj", "{CFD383AC-F21F-4DAD-929B-DA9B6124B5E8}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

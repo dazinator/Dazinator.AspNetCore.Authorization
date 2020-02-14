@@ -41,7 +41,7 @@ namespace Dazinator.AspNetCore.Authorization.Caching
             return item;
         }
 
-#if NETCOREAPP3_0
+#if NETSTANDARD2_1
         public Task<AuthorizationPolicy> GetFallbackPolicyAsync()
         {
             var cache = _options.Cache;
